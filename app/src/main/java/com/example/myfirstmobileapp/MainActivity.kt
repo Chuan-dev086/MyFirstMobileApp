@@ -60,10 +60,10 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TodoApp() {
     var inputTask by remember { mutableStateOf("") }
-    // 推荐使用 mutableStateListOf 来管理列表状态
+    // recommend using mutableStateListOf to manage list status
     val taskList = remember { mutableStateListOf<String>() }
 
-    // Snackbar 管理器和协程作用域
+    // Snackbar Host State Coroutine Scope
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
@@ -86,7 +86,7 @@ fun TodoApp() {
                 OutlinedTextField(
                     value = inputTask,
                     onValueChange = { inputTask = it },
-                    label = { Text("请输入待办事项") },
+                    label = { Text("Please type in TODOS ") },
                     modifier = Modifier.weight(1f)
                 )
                 Button(
@@ -98,7 +98,7 @@ fun TodoApp() {
                     },
                     modifier = Modifier.padding(start = 8.dp)
                 ) {
-                    Text("添加")
+                    Text("Add")
                 }
             }
 
@@ -113,19 +113,21 @@ fun TodoApp() {
                             .fillMaxWidth()
                             .padding(vertical = 4.dp)
                             .clickable {
-                                // 点击时，先从列表移除
+                                // Click to remove from list
                                 taskList.remove(task)
 
-                                // 然后弹出 Snackbar（设置为 Long，给足看提示和点按钮的时间）
+                                // Then show a Snack bar (set to LONG to give enough time
+                                // to read the hint and click the button)
                                 scope.launch {
                                     val result = snackbarHostState.showSnackbar(
                                         message = "已删除: $task",
                                         actionLabel = "撤销",
                                         duration = SnackbarDuration.Long // 改成 Long，多显示一会儿
                                     )
-                                    // 如果用户点击了“撤销”
+                                    // if user click restore button
                                     if (result == SnackbarResult.ActionPerformed) {
-                                        taskList.add(task) // 把删掉的加回列表
+                                        taskList.add(task) // pull back the deleted item
+                                                            // back to the list
                                     }
                                 }
                             },
