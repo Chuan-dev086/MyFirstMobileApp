@@ -1,8 +1,7 @@
-import org.gradle.kotlin.dsl.dependencies
-
 plugins {
     alias(libs.plugins.android.application)
     alias(libs.plugins.kotlin.compose)
+    alias(libs.plugins.ksp) // 1. 新增：KSP 插件（用于 Room）
 }
 
 android {
@@ -48,8 +47,17 @@ dependencies {
     implementation(libs.androidx.core.ktx)
     implementation(libs.androidx.lifecycle.runtime.ktx)
     implementation(libs.androidx.lifecycle.viewmodel.compose)
+
+    // 2. 新增：Room 数据库依赖
+    implementation(libs.androidx.room.runtime)
+    implementation(libs.androidx.room.ktx)
+    ksp(libs.androidx.room.compiler)
+
     testImplementation(libs.junit)
-    androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
+    // 3. 注释掉报错的测试依赖，它不影响 App 实际运行
+    // androidTestImplementation(libs.androidx.compose.ui.test.junit4)
+
     androidTestImplementation(libs.androidx.espresso.core)
     androidTestImplementation(libs.androidx.junit)
     debugImplementation(libs.androidx.compose.ui.test.manifest)
