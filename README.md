@@ -1,56 +1,47 @@
 # MyFirstMobileApp
 
-A simple to-do list app built with Kotlin and Jetpack Compose, created as a learning project for Android development.
-
-## 📱 Screenshots
-
-_Screenshots coming soon._
+A modern, persistent To-Do list app built with Kotlin and Jetpack Compose. Originally created as a learning project, it has evolved into a fully functional application utilizing modern Android architecture (MVVM) and local data persistence (Room).
 
 ## ✨ Features
 
-- Add tasks to a to-do list
-- Mark tasks as done / undone (completed tasks are shown with strikethrough)
-- Delete tasks with a "Delete" button
-- Undo a deletion via a Snackbar action
-- Light / dark theme following the system setting
-- Dynamic color support on Android 12+
+- **Full CRUD Operations**: Add new tasks, mark them as done/undone, and delete them.
+- **Data Persistence**: Tasks are saved in a local Room database and survive app restarts.
+- **Modern UI**: Built entirely with Jetpack Compose and Material 3.
+- **Completion Status**: Completed tasks are clearly indicated with a checked box and strikethrough text.
+- **Undo Delete**: Accidentally deleted a task? Instantly undo it via the Snackbar action.
+- **Responsive Theming**: Supports dynamic color (Android 12+) and seamlessly adapts to system Light/Dark mode.
 
 ## 🛠️ Tech Stack
 
 - **Language:** Kotlin
 - **UI:** Jetpack Compose (Material 3)
-- **State management:** `State`, `MutableStateListOf` (in-memory)
+- **Architecture:** MVVM (Model-View-ViewModel)
+- **State Management:** `ViewModel` + `StateFlow` + `collectAsStateWithLifecycle`
+- **Local Database:** Room (with KSP for annotation processing)
 - **Async:** Kotlin Coroutines
-- **Min SDK:** _(fill in from `app/build.gradle.kts`, e.g. 24)_
-- **Target SDK:** _(fill in from `app/build.gradle.kts`, e.g. 36)_
+- **Min SDK:** 25
+- **Target SDK:** 37 (Ultra-modern SDK)
 
 ## 📂 Project Structure
 
-```
-
+```text
 app/src/main/java/com/example/myfirstmobileapp/
-├── MainActivity.kt # Entry point + Todo UI + Task model (all in one file)
+├── MainActivity.kt      # Entry point, Compose UI, and UI events
+├── TaskDatabase.kt      # Room Entity (Task), DAO, and Database setup
+├── TaskViewModel.kt     # ViewModel handling state and database interactions
 └── ui/theme/
-├── Color.kt
-├── Theme.kt
-└── Type.kt
-
+    ├── Color.kt
+    ├── Theme.kt
+    └── Type.kt
 ```
-
-Note: the app logic currently lives in `MainActivity.kt`. A refactor into
-`model/`, `data/`, and `ui/` layers is planned — see Roadmap.
 
 ## 🚀 Getting Started
 
 ### Requirements
 
-- Android Studio (latest stable)
+- Android Studio (Latest Preview or Stable version matching AGP 9.x)
 - JDK 17+
 - Android SDK matching the project's `compileSdk`
-
-## 🛠️ Build & Run
-
-Please ensure you have **JDK 17** (or the required version for your project) configured on your system before proceeding.
 
 ### 1. Command Line Build
 
@@ -58,15 +49,15 @@ Open your terminal and run the following commands:
 
 ```bash
 # Clone the repository
-git clone https://github.com
- cd MyFirstMobileApp
+git clone https://github.com/Chuan-dev086/MyFirstMobileApp.git
+cd MyFirstMobileApp
 
 # Build and generate the Debug APK
 # For macOS / Linux:
- ./gradlew assembleDebug
+./gradlew assembleDebug
 
 # For Windows (PowerShell or CMD):
- .\gradlew.bat assembleDebug
+.\gradlew.bat assembleDebug
 ```
 
 Once the build completes successfully, you can find the generated APK file at:
@@ -77,29 +68,26 @@ Once the build completes successfully, you can find the generated APK file at:
 1. Launch **Android Studio**.
 2. Click **Open** and select the root directory of this project.
 3. Wait for the **Gradle Sync** process to finish.
-4. Select your device or emulator from the top toolbar, then click **Run ▶** (`Shift + F10`).
+4. Select your physical device or emulator from the top toolbar, then click **Run ▶** (`Shift + F10`).
 
-### ⚠️ Known Limitations
+## ⚠️ Known Limitations
 
-- **No persistence.** Tasks are kept in memory only — they are lost when the app is closed or the device restarts.
-- **No configuration-change handling.** Rotating the screen recreates the Activity and clears the current list and input field.
-- **No task editing.** A task must be deleted and re-added to change its title.
+- **No task editing yet.** A task must be deleted and re-added to change its title.
 - **No filtering / sorting / search.**
-- **Hardcoded UI strings.** Text is not yet extracted to `strings.xml`.
-- **No tests or CI.**
+- **Hardcoded UI strings.** Text is not yet extracted to `strings.xml` for i18n.
 
 ## 🗺️ Roadmap
 
-- [ ] Refactor into `model/` / `data/` / `ui/` layers
-- [ ] Introduce `ViewModel` and `StateFlow`
-- [ ] Persist tasks with Room
-- [ ] Edit existing tasks
+- [x] Refactor into distinct UI / Data / ViewModel layers
+- [x] Introduce `ViewModel` and `StateFlow`
+- [x] Persist tasks with Room
+- [ ] Edit existing tasks (Inline or Dialog)
+- [ ] Swipe-to-delete gesture
+- [ ] Floating Action Button (FAB) for adding tasks
 - [ ] Filter: All / Active / Completed
 - [ ] Empty-state UI
-- [ ] IME "Done" action to submit a task
 - [ ] Move UI strings to `strings.xml` (i18n)
 - [ ] Priority and due date
-- [ ] Search and sort
 - [ ] Local reminder notifications
 - [ ] Unit tests for ViewModel + GitHub Actions CI
 
