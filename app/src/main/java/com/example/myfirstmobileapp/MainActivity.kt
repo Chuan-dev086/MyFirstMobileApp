@@ -4,7 +4,6 @@ import android.os.Bundle
 import androidx.activity.ComponentActivity
 import androidx.activity.compose.setContent
 import androidx.activity.enableEdgeToEdge
-import androidx.compose.foundation.clickable
 import androidx.compose.foundation.layout.Arrangement
 import androidx.compose.foundation.layout.Column
 import androidx.compose.foundation.layout.Row
@@ -18,6 +17,8 @@ import androidx.compose.foundation.lazy.items
 import androidx.compose.material3.Button
 import androidx.compose.material3.Card
 import androidx.compose.material3.CardDefaults
+import androidx.compose.material3.Checkbox
+import androidx.compose.material3.MaterialTheme
 import androidx.compose.material3.OutlinedTextField
 import androidx.compose.material3.Scaffold
 import androidx.compose.material3.SnackbarDuration
@@ -25,6 +26,7 @@ import androidx.compose.material3.SnackbarHost
 import androidx.compose.material3.SnackbarHostState
 import androidx.compose.material3.SnackbarResult
 import androidx.compose.material3.Text
+import androidx.compose.material3.TextButton
 import androidx.compose.runtime.Composable
 import androidx.compose.runtime.getValue
 import androidx.compose.runtime.mutableStateListOf
@@ -34,23 +36,24 @@ import androidx.compose.runtime.rememberCoroutineScope
 import androidx.compose.runtime.setValue
 import androidx.compose.ui.Alignment
 import androidx.compose.ui.Modifier
-import androidx.compose.ui.graphics.Color
+import androidx.compose.ui.text.style.TextDecoration
 import androidx.compose.ui.unit.dp
 import androidx.compose.ui.unit.sp
+import com.example.myfirstmobileapp.ui.theme.MyFirstMobileAppTheme
 import kotlinx.coroutines.launch
+
+data class Task(
+    val id: Long = System.nanoTime(),
+    val title: String,
+    val isDone: Boolean = false
+)
 
 class MainActivity : ComponentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         enableEdgeToEdge()
         setContent {
-            Column(
-                modifier = Modifier
-                    .fillMaxSize()
-                    .padding(16.dp),
-                verticalArrangement = Arrangement.Center,
-                horizontalAlignment = Alignment.CenterHorizontally
-            ) {
+            MyFirstMobileAppTheme {
                 TodoApp()
             }
         }
@@ -60,18 +63,15 @@ class MainActivity : ComponentActivity() {
 @Composable
 fun TodoApp() {
     var inputTask by remember { mutableStateOf("") }
-    // recommend using mutableStateListOf to manage list status
-    val taskList = remember { mutableStateListOf<String>() }
+    val taskList = remember { mutableStateListOf<Task>() }
 
-    // Snackbar Host State Coroutine Scope
     val snackbarHostState = remember { SnackbarHostState() }
     val scope = rememberCoroutineScope()
 
     Scaffold(
         snackbarHost = { SnackbarHost(hostState = snackbarHostState) },
-        containerColor = Color(0xFF1E1E1E)
+        containerColor = MaterialTheme.colorScheme.background
     ) { paddingValues ->
-
         Column(
             modifier = Modifier
                 .fillMaxSize()
@@ -86,13 +86,15 @@ fun TodoApp() {
                 OutlinedTextField(
                     value = inputTask,
                     onValueChange = { inputTask = it },
-                    label = { Text("Please type in TODOS ") },
-                    modifier = Modifier.weight(1f)
+                    label = { Text("Please type in TODOS") },
+                    modifier = Modifier.weight(1f),
+                    singleLine = true
                 )
                 Button(
                     onClick = {
-                        if (inputTask.isNotBlank()) {
-                            taskList.add(inputTask)
+                        val text = inputTask.trim()
+                        if (text.isNotEmpty()) {
+                            taskList.add(Task(title = text))
                             inputTask = ""
                         }
                     },
@@ -105,40 +107,68 @@ fun TodoApp() {
             Spacer(modifier = Modifier.height(20.dp))
 
             LazyColumn(
-                modifier = Modifier.fillMaxSize()
+                modifier = Modifier.fillMaxSize(),
+                verticalArrangement = Arrangement.spacedBy(4.dp)
             ) {
-                items(taskList) { task ->
+                items(taskList, key = { it.id }) { task ->
                     Card(
-                        modifier = Modifier
-                            .fillMaxWidth()
-                            .padding(vertical = 4.dp)
-                            .clickable {
-                                // Click to remove from list
-                                taskList.remove(task)
-
-                                // Then show a Snack bar (set to LONG to give enough time
-                                // to read the hint and click the button)
-                                scope.launch {
-                                    val result = snackbarHostState.showSnackbar(
-                                        message = "已删除: $task",
-                                        actionLabel = "撤销",
-                                        duration = SnackbarDuration.Long // 改成 Long，多显示一会儿
-                                    )
-                                    // if user click restore button
-                                    if (result == SnackbarResult.ActionPerformed) {
-                                        taskList.add(task) // pull back the deleted item
-                                                            // back to the list
-                                    }
-                                }
-                            },
+                        modifier = Modifier.fillMaxWidth(),
                         elevation = CardDefaults.cardElevation(defaultElevation = 2.dp)
                     ) {
-                        Text(
-                            text = task,
-                            modifier = Modifier.padding(16.dp),
-                            fontSize = 18.sp,
-                            color = Color.Black
-                        )
+                        Row(
+                            modifier = Modifier
+                                .fillMaxWidth()
+                                .padding(horizontal = 8.dp, vertical = 4.dp),
+                            verticalAlignment = Alignment.CenterVertically
+                        ) {
+                            Checkbox(
+                                checked = task.isDone,
+                                onCheckedChange = { checked ->
+                                    val index = taskList.indexOf(task)
+                                    if (index >= 0) {
+                                        taskList[index] = task.copy(isDone = checked)
+                                    }
+                                }
+                            )
+
+                            Text(
+                                text = task.title,
+                                modifier = Modifier
+                                    .weight(1f)
+                                    .padding(horizontal = 8.dp),
+                                fontSize = 18.sp,
+                                color = MaterialTheme.colorScheme.onSurface,
+                                textDecoration = if (task.isDone) {
+                                    TextDecoration.LineThrough
+                                } else {
+                                    TextDecoration.None
+                                }
+                            )
+
+                            TextButton(
+                                onClick = {
+                                    val index = taskList.indexOf(task)
+                                    if (index < 0) return@TextButton
+                                    taskList.removeAt(index)
+
+                                    scope.launch {
+                                        val result = snackbarHostState.showSnackbar(
+                                            message = "已删除: ${task.title}",
+                                            actionLabel = "撤销",
+                                            duration = SnackbarDuration.Long
+                                        )
+                                        if (result == SnackbarResult.ActionPerformed) {
+                                            taskList.add(
+                                                index.coerceAtMost(taskList.size),
+                                                task
+                                            )
+                                        }
+                                    }
+                                }
+                            ) {
+                                Text("删除")
+                            }
+                        }
                     }
                 }
             }
